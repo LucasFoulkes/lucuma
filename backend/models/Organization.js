@@ -17,6 +17,8 @@ const organizationSchema = new mongoose.Schema({
         trim: true,
         default: ''
     }
+}, {
+    timestamps: true // Adds createdAt and updatedAt fields
 });
 
 const Organization = mongoose.model('Organization', organizationSchema);
