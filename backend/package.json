@@ -15,6 +15,10 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
-    "nodemon": "^3.1.7"
+    "express-restify-mongoose": "^9.0.4",
+    "mongoose": "^8.7.3",
+    "moongose": "^1.0.0",
+    "nodemon": "^3.1.7",
+    "path": "^0.12.7"
   }
 }
