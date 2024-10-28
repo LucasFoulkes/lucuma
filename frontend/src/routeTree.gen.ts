@@ -13,6 +13,15 @@
 import { Route as rootRoute } from './routes/__root'
 import { Route as DashboardImport } from './routes/dashboard'
 import { Route as IndexImport } from './routes/index'
+import { Route as DashboardIndexImport } from './routes/dashboard/index'
+import { Route as DashboardUsersImport } from './routes/dashboard/users'
+import { Route as DashboardPhytopathogensImport } from './routes/dashboard/phytopathogens'
+import { Route as DashboardOrganizationsImport } from './routes/dashboard/organizations'
+import { Route as DashboardMeasurementsImport } from './routes/dashboard/measurements'
+import { Route as DashboardGreenhousesImport } from './routes/dashboard/greenhouses'
+import { Route as DashboardFarmsImport } from './routes/dashboard/farms'
+import { Route as DashboardContactsImport } from './routes/dashboard/contacts'
+import { Route as DashboardBedsImport } from './routes/dashboard/beds'
 
 // Create/Update Routes
 
@@ -26,6 +35,60 @@ const IndexRoute = IndexImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRoute,
+} as any)
+
+const DashboardIndexRoute = DashboardIndexImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => DashboardRoute,
+} as any)
+
+const DashboardUsersRoute = DashboardUsersImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => DashboardRoute,
+} as any)
+
+const DashboardPhytopathogensRoute = DashboardPhytopathogensImport.update({
+  id: '/phytopathogens',
+  path: '/phytopathogens',
+  getParentRoute: () => DashboardRoute,
+} as any)
+
+const DashboardOrganizationsRoute = DashboardOrganizationsImport.update({
+  id: '/organizations',
+  path: '/organizations',
+  getParentRoute: () => DashboardRoute,
+} as any)
+
+const DashboardMeasurementsRoute = DashboardMeasurementsImport.update({
+  id: '/measurements',
+  path: '/measurements',
+  getParentRoute: () => DashboardRoute,
+} as any)
+
+const DashboardGreenhousesRoute = DashboardGreenhousesImport.update({
+  id: '/greenhouses',
+  path: '/greenhouses',
+  getParentRoute: () => DashboardRoute,
+} as any)
+
+const DashboardFarmsRoute = DashboardFarmsImport.update({
+  id: '/farms',
+  path: '/farms',
+  getParentRoute: () => DashboardRoute,
+} as any)
+
+const DashboardContactsRoute = DashboardContactsImport.update({
+  id: '/contacts',
+  path: '/contacts',
+  getParentRoute: () => DashboardRoute,
+} as any)
+
+const DashboardBedsRoute = DashboardBedsImport.update({
+  id: '/beds',
+  path: '/beds',
+  getParentRoute: () => DashboardRoute,
 } as any)
 
 // Populate the FileRoutesByPath interface
@@ -46,44 +109,194 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardImport
       parentRoute: typeof rootRoute
     }
+    '/dashboard/beds': {
+      id: '/dashboard/beds'
+      path: '/beds'
+      fullPath: '/dashboard/beds'
+      preLoaderRoute: typeof DashboardBedsImport
+      parentRoute: typeof DashboardImport
+    }
+    '/dashboard/contacts': {
+      id: '/dashboard/contacts'
+      path: '/contacts'
+      fullPath: '/dashboard/contacts'
+      preLoaderRoute: typeof DashboardContactsImport
+      parentRoute: typeof DashboardImport
+    }
+    '/dashboard/farms': {
+      id: '/dashboard/farms'
+      path: '/farms'
+      fullPath: '/dashboard/farms'
+      preLoaderRoute: typeof DashboardFarmsImport
+      parentRoute: typeof DashboardImport
+    }
+    '/dashboard/greenhouses': {
+      id: '/dashboard/greenhouses'
+      path: '/greenhouses'
+      fullPath: '/dashboard/greenhouses'
+      preLoaderRoute: typeof DashboardGreenhousesImport
+      parentRoute: typeof DashboardImport
+    }
+    '/dashboard/measurements': {
+      id: '/dashboard/measurements'
+      path: '/measurements'
+      fullPath: '/dashboard/measurements'
+      preLoaderRoute: typeof DashboardMeasurementsImport
+      parentRoute: typeof DashboardImport
+    }
+    '/dashboard/organizations': {
+      id: '/dashboard/organizations'
+      path: '/organizations'
+      fullPath: '/dashboard/organizations'
+      preLoaderRoute: typeof DashboardOrganizationsImport
+      parentRoute: typeof DashboardImport
+    }
+    '/dashboard/phytopathogens': {
+      id: '/dashboard/phytopathogens'
+      path: '/phytopathogens'
+      fullPath: '/dashboard/phytopathogens'
+      preLoaderRoute: typeof DashboardPhytopathogensImport
+      parentRoute: typeof DashboardImport
+    }
+    '/dashboard/users': {
+      id: '/dashboard/users'
+      path: '/users'
+      fullPath: '/dashboard/users'
+      preLoaderRoute: typeof DashboardUsersImport
+      parentRoute: typeof DashboardImport
+    }
+    '/dashboard/': {
+      id: '/dashboard/'
+      path: '/'
+      fullPath: '/dashboard/'
+      preLoaderRoute: typeof DashboardIndexImport
+      parentRoute: typeof DashboardImport
+    }
   }
 }
 
 // Create and export the route tree
 
+interface DashboardRouteChildren {
+  DashboardBedsRoute: typeof DashboardBedsRoute
+  DashboardContactsRoute: typeof DashboardContactsRoute
+  DashboardFarmsRoute: typeof DashboardFarmsRoute
+  DashboardGreenhousesRoute: typeof DashboardGreenhousesRoute
+  DashboardMeasurementsRoute: typeof DashboardMeasurementsRoute
+  DashboardOrganizationsRoute: typeof DashboardOrganizationsRoute
+  DashboardPhytopathogensRoute: typeof DashboardPhytopathogensRoute
+  DashboardUsersRoute: typeof DashboardUsersRoute
+  DashboardIndexRoute: typeof DashboardIndexRoute
+}
+
+const DashboardRouteChildren: DashboardRouteChildren = {
+  DashboardBedsRoute: DashboardBedsRoute,
+  DashboardContactsRoute: DashboardContactsRoute,
+  DashboardFarmsRoute: DashboardFarmsRoute,
+  DashboardGreenhousesRoute: DashboardGreenhousesRoute,
+  DashboardMeasurementsRoute: DashboardMeasurementsRoute,
+  DashboardOrganizationsRoute: DashboardOrganizationsRoute,
+  DashboardPhytopathogensRoute: DashboardPhytopathogensRoute,
+  DashboardUsersRoute: DashboardUsersRoute,
+  DashboardIndexRoute: DashboardIndexRoute,
+}
+
+const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
+  DashboardRouteChildren,
+)
+
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/dashboard': typeof DashboardRoute
+  '/dashboard': typeof DashboardRouteWithChildren
+  '/dashboard/beds': typeof DashboardBedsRoute
+  '/dashboard/contacts': typeof DashboardContactsRoute
+  '/dashboard/farms': typeof DashboardFarmsRoute
+  '/dashboard/greenhouses': typeof DashboardGreenhousesRoute
+  '/dashboard/measurements': typeof DashboardMeasurementsRoute
+  '/dashboard/organizations': typeof DashboardOrganizationsRoute
+  '/dashboard/phytopathogens': typeof DashboardPhytopathogensRoute
+  '/dashboard/users': typeof DashboardUsersRoute
+  '/dashboard/': typeof DashboardIndexRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/dashboard': typeof DashboardRoute
+  '/dashboard/beds': typeof DashboardBedsRoute
+  '/dashboard/contacts': typeof DashboardContactsRoute
+  '/dashboard/farms': typeof DashboardFarmsRoute
+  '/dashboard/greenhouses': typeof DashboardGreenhousesRoute
+  '/dashboard/measurements': typeof DashboardMeasurementsRoute
+  '/dashboard/organizations': typeof DashboardOrganizationsRoute
+  '/dashboard/phytopathogens': typeof DashboardPhytopathogensRoute
+  '/dashboard/users': typeof DashboardUsersRoute
+  '/dashboard': typeof DashboardIndexRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
-  '/dashboard': typeof DashboardRoute
+  '/dashboard': typeof DashboardRouteWithChildren
+  '/dashboard/beds': typeof DashboardBedsRoute
+  '/dashboard/contacts': typeof DashboardContactsRoute
+  '/dashboard/farms': typeof DashboardFarmsRoute
+  '/dashboard/greenhouses': typeof DashboardGreenhousesRoute
+  '/dashboard/measurements': typeof DashboardMeasurementsRoute
+  '/dashboard/organizations': typeof DashboardOrganizationsRoute
+  '/dashboard/phytopathogens': typeof DashboardPhytopathogensRoute
+  '/dashboard/users': typeof DashboardUsersRoute
+  '/dashboard/': typeof DashboardIndexRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/dashboard'
+  fullPaths:
+    | '/'
+    | '/dashboard'
+    | '/dashboard/beds'
+    | '/dashboard/contacts'
+    | '/dashboard/farms'
+    | '/dashboard/greenhouses'
+    | '/dashboard/measurements'
+    | '/dashboard/organizations'
+    | '/dashboard/phytopathogens'
+    | '/dashboard/users'
+    | '/dashboard/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dashboard'
-  id: '__root__' | '/' | '/dashboard'
+  to:
+    | '/'
+    | '/dashboard/beds'
+    | '/dashboard/contacts'
+    | '/dashboard/farms'
+    | '/dashboard/greenhouses'
+    | '/dashboard/measurements'
+    | '/dashboard/organizations'
+    | '/dashboard/phytopathogens'
+    | '/dashboard/users'
+    | '/dashboard'
+  id:
+    | '__root__'
+    | '/'
+    | '/dashboard'
+    | '/dashboard/beds'
+    | '/dashboard/contacts'
+    | '/dashboard/farms'
+    | '/dashboard/greenhouses'
+    | '/dashboard/measurements'
+    | '/dashboard/organizations'
+    | '/dashboard/phytopathogens'
+    | '/dashboard/users'
+    | '/dashboard/'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  DashboardRoute: typeof DashboardRoute
+  DashboardRoute: typeof DashboardRouteWithChildren
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  DashboardRoute: DashboardRoute,
+  DashboardRoute: DashboardRouteWithChildren,
 }
 
 export const routeTree = rootRoute
@@ -106,7 +319,54 @@ export const routeTree = rootRoute
       "filePath": "index.jsx"
     },
     "/dashboard": {
-      "filePath": "dashboard.jsx"
+      "filePath": "dashboard.jsx",
+      "children": [
+        "/dashboard/beds",
+        "/dashboard/contacts",
+        "/dashboard/farms",
+        "/dashboard/greenhouses",
+        "/dashboard/measurements",
+        "/dashboard/organizations",
+        "/dashboard/phytopathogens",
+        "/dashboard/users",
+        "/dashboard/"
+      ]
+    },
+    "/dashboard/beds": {
+      "filePath": "dashboard/beds.jsx",
+      "parent": "/dashboard"
+    },
+    "/dashboard/contacts": {
+      "filePath": "dashboard/contacts.jsx",
+      "parent": "/dashboard"
+    },
+    "/dashboard/farms": {
+      "filePath": "dashboard/farms.jsx",
+      "parent": "/dashboard"
+    },
+    "/dashboard/greenhouses": {
+      "filePath": "dashboard/greenhouses.jsx",
+      "parent": "/dashboard"
+    },
+    "/dashboard/measurements": {
+      "filePath": "dashboard/measurements.jsx",
+      "parent": "/dashboard"
+    },
+    "/dashboard/organizations": {
+      "filePath": "dashboard/organizations.jsx",
+      "parent": "/dashboard"
+    },
+    "/dashboard/phytopathogens": {
+      "filePath": "dashboard/phytopathogens.jsx",
+      "parent": "/dashboard"
+    },
+    "/dashboard/users": {
+      "filePath": "dashboard/users.jsx",
+      "parent": "/dashboard"
+    },
+    "/dashboard/": {
+      "filePath": "dashboard/index.jsx",
+      "parent": "/dashboard"
     }
   }
 }

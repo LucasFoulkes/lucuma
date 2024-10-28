@@ -13,8 +13,6 @@ const PhytopathogenSchema = new mongoose.Schema({
             max: Number
         }
     }]
-}, {
-    timestamps: true
 });
 
 module.exports = mongoose.model('Phytopathogen', PhytopathogenSchema);

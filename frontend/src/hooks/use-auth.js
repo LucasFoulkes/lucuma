@@ -1,57 +1,95 @@
-import { useState, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import ky from 'ky';
-import { useToast } from "@/hooks/use-toast"
 
+// Update the api creation to include Authorization header when token exists
 const api = ky.create({
-    prefixUrl: 'https://www.cananvalley.systems/api',
-    credentials: 'include',
-    headers: {
-        'Content-Type': 'application/json',
-    },
+    prefixUrl: 'https://cananvalley.systems/api/auth',
     hooks: {
         beforeRequest: [
             request => {
-                request.headers.set('Origin', window.location.origin);
+                const token = localStorage.getItem('token');
+                if (token) {
+                    request.headers.set('Authorization', `Bearer ${token}`);
+                }
             }
         ]
     }
 });
 
-export function useAuth() {
+export function useAuth(options = { autoCheck: false }) {
+    const [isAuthenticated, setIsAuthenticated] = useState(() => {
+        return localStorage.getItem('user') !== null;
+    });
     const [isLoading, setIsLoading] = useState(false);
-    const { toast } = useToast();
+    const [user, setUser] = useState(() => {
+        const savedUser = localStorage.getItem('user');
+        return savedUser ? JSON.parse(savedUser) : null;
+    });
+    const [token, setToken] = useState(() => localStorage.getItem('token'));
 
-    const login = useCallback(async (username, password) => {
-        setIsLoading(true);
+    const updateUser = (userData, authToken = null) => {
+        if (userData && authToken) {
+            localStorage.setItem('user', JSON.stringify(userData));
+            localStorage.setItem('token', authToken);
+            setToken(authToken);
+            setUser(userData);
+            setIsAuthenticated(true);
+        } else {
+            localStorage.removeItem('user');
+            localStorage.removeItem('token');
+            setToken(null);
+            setUser(null);
+            setIsAuthenticated(false);
+        }
+    };
+
+    useEffect(() => {
+        if (options.autoCheck) {
+            checkAuth();
+        }
+    }, [options.autoCheck]);
+
+    const login = async (username, password) => {
         try {
             const response = await api.post('login', {
                 json: { username, password }
-            }).json();
-
-            toast({
-                title: "Success",
-                description: "Successfully logged in",
-            });
-
+            }).json(); // Add .json() to parse the response
+            updateUser(response.user, response.token); // Expect token in response
             return response;
         } catch (error) {
-            const message = await error.response?.json()
-                .then(data => data.message)
-                .catch(() => 'Login failed. Please try again.');
-
-            toast({
-                title: "Error",
-                description: message,
-                variant: "destructive",
-            });
             throw error;
+        }
+    };
+
+    const logout = async () => {
+        try {
+            await api.post('logout', { json: {} });
+            updateUser(null);
+        } catch (error) {
+            console.error('Logout error:', error);
+            // Still clear the user data even if logout request fails
+            updateUser(null);
+        }
+    };
+
+    const checkAuth = async () => {
+        try {
+            const response = await api.get('me');
+            updateUser(response.user);
+        } catch (error) {
+            updateUser(null);
         } finally {
             setIsLoading(false);
         }
-    }, [toast]);
+    };
 
     return {
+        isAuthenticated,
+        isLoading,
+        user,
+        token, // Add token to the returned values
         login,
-        isLoading
+        logout,
+        checkAuth
     };
 }

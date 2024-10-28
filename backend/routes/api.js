@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
+// Import all route modules
 const organizationRoutes = require('./organizationRoutes');
 const userRoutes = require('./userRoutes');
 const contactRoutes = require('./contactRoutes');
@@ -11,7 +12,7 @@ const phytopathogenRoutes = require('./phytopathogenRoutes');
 const measurementRoutes = require('./measurementRoutes');
 const authRoutes = require('./authRoutes');
 
-router.use(authRoutes);
+router.use('/auth', authRoutes);
 router.use(organizationRoutes);
 router.use(userRoutes);
 router.use(contactRoutes);

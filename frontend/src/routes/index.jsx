@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 function LoginPage() {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
-  const { login, isLoading } = useAuth()
+  const { login, isLoading } = useAuth({ autoCheck: false }) // Specify not to auto-check
   const navigate = useNavigate()
 
   const handleSubmit = async (e) => {
@@ -18,7 +18,6 @@ function LoginPage() {
       await login(username, password)
       navigate({ to: '/dashboard' })
     } catch (error) {
-      // Error is already handled in the useAuth hook
     }
   }
 

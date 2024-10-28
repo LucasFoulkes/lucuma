@@ -11,6 +11,8 @@ const ContactSchema = new mongoose.Schema({
     pais: String,
     cedula: String,
     notas: String
+}, {
+    timestamps: true
 });
 
 ContactSchema.virtual('user', {

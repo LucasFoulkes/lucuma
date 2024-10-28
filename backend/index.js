@@ -10,10 +10,9 @@ const apiRoutes = require('./routes/api');
 const app = express();
 const PORT = process.env.PORT || 4000;
 
-// Update CORS configuration
 app.use(cors({
-    origin: ['https://dev.cananvalley.systems', 'https://www.cananvalley.systems'], // Specify allowed origins
-    credentials: true,
+    origin: '*', // Allow all origins
+    credentials: true, // Important for cookies
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH', 'HEAD'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin']
 }));

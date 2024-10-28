@@ -62,6 +62,7 @@ router.post('/logout', (req, res) => {
         .json({ message: 'Logged out successfully' });
 });
 
+// Changed from /user to /me
 router.get('/me', authenticate, async (req, res) => {
     try {
         const user = await User.findById(req.user.userId)
@@ -73,19 +74,13 @@ router.get('/me', authenticate, async (req, res) => {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        res.json({ user });
+        // Return just the user object without wrapping it
+        res.json(user);
     } catch (error) {
         console.error('Get user error:', error);
         res.status(500).json({ message: 'Internal server error' });
     }
 });
 
-// Test auth route
-router.get('/test', authenticate, (req, res) => {
-    res.json({
-        message: 'Auth is working!',
-        user: req.user
-    });
-});
 
 module.exports = router;
