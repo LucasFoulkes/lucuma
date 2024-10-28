@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 require('dotenv').config();
+const path = require('path');
 
 const connectDB = require('./config/database');
 const apiRoutes = require('./routes/api');
@@ -9,18 +10,27 @@ const apiRoutes = require('./routes/api');
 const app = express();
 const PORT = process.env.PORT || 4000;
 
+// Update CORS configuration
 app.use(cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
-    credentials: true, // Important for cookies
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    origin: ['https://dev.cananvalley.systems', 'https://www.cananvalley.systems'], // Specify allowed origins
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH', 'HEAD'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin']
 }));
 app.use(express.json());
 app.use(cookieParser());
 
+// Serve static files from the frontend build directory
+app.use(express.static(path.join(__dirname, '../frontend/dist')));
+
 connectDB();
 
 app.use('/api', apiRoutes);
+
+// Handle SPA routing - send all non-API routes to index.html
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/dist/index.html'));
+});
 
 app.use((err, req, res, next) => {
     console.error(err.stack);

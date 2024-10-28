@@ -9,7 +9,6 @@ const FarmSchema = new mongoose.Schema({
 });
 
 FarmSchema.index({ location: '2dsphere' });
-FarmSchema.index({ organization: 1, name: 1 }, { unique: true });
 
 FarmSchema.virtual('greenhouses', {
     ref: 'Greenhouse',
