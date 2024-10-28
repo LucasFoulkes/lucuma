@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const restify = require('express-restify-mongoose');
 const Organization = require('../models/Organization');
+const { authenticate } = require('../middleware/auth');
 
 // Configure express-restify-mongoose
 restify.serve(router, Organization, {
@@ -12,13 +13,11 @@ restify.serve(router, Organization, {
     findOneAndUpdate: false,  // Use findOneAndUpdate for PUT requests
     findOneAndRemove: false,  // Use findOneAndRemove for DELETE requests
     // Optional: Add access control
-    preMiddleware: (req, res, next) => {
-        // You can add authentication/authorization here
-        next();
-    },
+    preMiddleware: authenticate,
+    select: '-__v',
     // Optional: Add custom error handling
     onError: (err, req, res, next) => {
-        console.error(err);
+        console.error('Organization route error:', err);
         res.status(400).json({
             error: err.message || 'An error occurred'
         });

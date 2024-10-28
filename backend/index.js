@@ -1,29 +1,30 @@
 const express = require('express');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
 require('dotenv').config();
+
 const connectDB = require('./config/database');
 const apiRoutes = require('./routes/api');
-const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 4000;
 
-// Middleware
-app.use(cors());
+app.use(cors({
+    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    credentials: true, // Important for cookies
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json());
+app.use(cookieParser());
 
-// Connect to Database
 connectDB();
 
-// Routes
 app.use('/api', apiRoutes);
 
-// Serve static files from the React frontend app
-app.use(express.static(path.join(__dirname, '../frontend/dist')));
-
-// Handle any requests that don't match the above
-app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../frontend/dist/index.html'));
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({ message: 'Something broke!' });
 });
 
 app.listen(PORT, () => {
