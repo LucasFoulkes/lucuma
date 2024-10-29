@@ -4,6 +4,16 @@ const restify = require('express-restify-mongoose');
 const Greenhouse = require('../models/Greenhouse');
 const { authenticate } = require('../middleware/auth');
 
+// Add route to get schema
+router.get('/greenhouse/schema', authenticate, (req, res) => {
+    const schemaDefinition = Greenhouse.schema.obj;
+    res.json({
+        schema: schemaDefinition,
+        modelName: Greenhouse.modelName
+    });
+});
+
+
 restify.serve(router, Greenhouse, {
     prefix: '',
     version: '',

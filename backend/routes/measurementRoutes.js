@@ -4,6 +4,16 @@ const restify = require('express-restify-mongoose');
 const Measurement = require('../models/Measurement');
 const { authenticate } = require('../middleware/auth');
 
+// Add route to get schema
+router.get('/measurement/schema', authenticate, (req, res) => {
+    const schemaDefinition = Measurement.schema.obj;
+    res.json({
+        schema: schemaDefinition,
+        modelName: Measurement.modelName
+    });
+});
+
+
 restify.serve(router, Measurement, {
     prefix: '',
     version: '',

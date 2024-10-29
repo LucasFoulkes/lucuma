@@ -4,6 +4,15 @@ const restify = require('express-restify-mongoose');
 const Organization = require('../models/Organization');
 const { authenticate } = require('../middleware/auth');
 
+// Add route to get schema
+router.get('/organization/schema', authenticate, (req, res) => {
+    const schemaDefinition = Organization.schema.obj;
+    res.json({
+        schema: schemaDefinition,
+        modelName: Organization.modelName
+    });
+});
+
 // Configure express-restify-mongoose
 restify.serve(router, Organization, {
     prefix: '',  // Since we're already under /api/organizations

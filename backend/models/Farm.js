@@ -6,6 +6,8 @@ const FarmSchema = new mongoose.Schema({
     name: { type: String, required: true },
     location: LocationSchema,
     description: String,
+}, {
+    timestamps: true  // Added timestamps
 });
 
 FarmSchema.index({ location: '2dsphere' });

@@ -1,16 +1,15 @@
 const mongoose = require('mongoose');
 
 const ContactSchema = new mongoose.Schema({
-    nombres: { type: String, required: true },
-    apellido_paterno: { type: String, required: true },
-    apellido_materno: String,
-    email: { type: String, required: true, unique: true },
-    telefono: String,
-    direccion: String,
-    ciudad: String,
-    pais: String,
-    cedula: String,
-    notas: String
+    name: { type: String, required: true },
+    lastName: { type: String, required: true },
+    email: { type: String, required: false, unique: true },
+    phone: { type: String, required: false },
+    address: { type: String, required: false },
+    city: { type: String, required: false },
+    country: { type: String, required: false },
+    idNumber: { type: String, required: false },
+    notes: { type: String, required: false }
 }, {
     timestamps: true
 });

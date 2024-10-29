@@ -4,6 +4,16 @@ const restify = require('express-restify-mongoose');
 const Phytopathogen = require('../models/Phytopathogen');
 const { authenticate } = require('../middleware/auth');
 
+// Add route to get schema
+router.get('/phytopathogen/schema', authenticate, (req, res) => {
+    const schemaDefinition = Phytopathogen.schema.obj;
+    res.json({
+        schema: schemaDefinition,
+        modelName: Phytopathogen.modelName
+    });
+});
+
+
 restify.serve(router, Phytopathogen, {
     prefix: '',
     version: '',

@@ -1,20 +1,5 @@
 import { useState, useEffect } from 'react';
-import ky from 'ky';
-
-// Create a reusable API instance with common configuration
-const api = ky.create({
-    prefixUrl: 'https://cananvalley.systems/api',
-    hooks: {
-        beforeRequest: [
-            request => {
-                const token = localStorage.getItem('token');
-                if (token) {
-                    request.headers.set('Authorization', `Bearer ${token}`);
-                }
-            }
-        ]
-    }
-});
+import { fetchApi } from '../lib/api';
 
 /**
  * Custom hook for fetching data from the API
@@ -31,13 +16,7 @@ export function useFetch(endpoint, options = {}) {
         try {
             setIsLoading(true);
             setError(null);
-
-            const mergedOptions = {
-                ...options,
-                ...customOptions
-            };
-
-            const response = await api.get(endpoint, mergedOptions).json();
+            const response = await fetchApi(endpoint, 'get', { ...options, ...customOptions });
             setData(response);
             return response;
         } catch (err) {
@@ -50,29 +29,8 @@ export function useFetch(endpoint, options = {}) {
 
     useEffect(() => {
         fetchData();
-    }, [endpoint]); // Re-fetch when endpoint changes
+    }, [endpoint]);
 
-    return {
-        data,
-        error,
-        isLoading,
-        refetch: fetchData
-    };
-}
-
-/**
- * Helper function for making one-off API requests
- * @param {string} endpoint - The API endpoint
- * @param {string} method - HTTP method (get, post, put, delete, patch)
- * @param {Object} options - Request options
- * @returns {Promise} - API response
- */
-export async function fetchApi(endpoint, method = 'get', options = {}) {
-    try {
-        const response = await api[method](endpoint, options).json();
-        return response;
-    } catch (err) {
-        throw err;
-    }
+    return { data, error, isLoading, refetch: fetchData };
 }
 

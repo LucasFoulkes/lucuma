@@ -4,6 +4,16 @@ const restify = require('express-restify-mongoose');
 const Bed = require('../models/Bed');
 const { authenticate } = require('../middleware/auth');
 
+// Add route to get schema
+router.get('/bed/schema', authenticate, (req, res) => {
+    const schemaDefinition = Bed.schema.obj;
+    res.json({
+        schema: schemaDefinition,
+        modelName: Bed.modelName
+    });
+});
+
+
 restify.serve(router, Bed, {
     prefix: '',
     version: '',

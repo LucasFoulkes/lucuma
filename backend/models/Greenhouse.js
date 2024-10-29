@@ -6,6 +6,8 @@ const GreenhouseSchema = new mongoose.Schema({
     name: { type: String, required: true },
     location: LocationSchema,
     description: String,
+}, {
+    timestamps: true  // Added timestamps
 });
 
 GreenhouseSchema.index({ location: '2dsphere' });

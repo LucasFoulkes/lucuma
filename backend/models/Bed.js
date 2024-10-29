@@ -5,7 +5,8 @@ const BedSchema = new mongoose.Schema({
     greenhouse: { type: mongoose.Schema.Types.ObjectId, ref: 'Greenhouse', required: true },
     name: { type: String, required: true },
     location: LocationSchema,
-
+}, {
+    timestamps: true  // Added timestamps
 });
 
 BedSchema.index({ location: '2dsphere' });

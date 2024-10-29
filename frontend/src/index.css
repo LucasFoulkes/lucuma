@@ -23,6 +23,10 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.scrollbar-hide {
+  scrollbar-width: none;
+}
+
 body {
   margin: 0;
   display: flex;
