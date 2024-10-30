@@ -1,57 +1,16 @@
-import { useState, useEffect } from 'react';
-import ky from 'ky';
+import { useState, useEffect, useCallback } from 'react';
+import { apiClient } from '@/lib/api-client';
 
-// Create API client with auth handling
-const api = ky.create({
-    prefixUrl: 'https://cananvalley.systems/api',
-    hooks: {
-        beforeRequest: [
-            request => {
-                const token = localStorage.getItem('token');
-                if (token) {
-                    request.headers.set('Authorization', `Bearer ${token}`);
-                }
-            }
-        ]
-    },
-    timeout: 30000
-});
-
-// Helper to handle API responses
-const handleRequest = async (promise) => {
-    try {
-        const response = await promise;
-        // Check if there's actually content to parse
-        const contentType = response.headers.get('content-type');
-        if (contentType && contentType.includes('application/json')) {
-            return await response.json();
-        }
-        // For empty responses (like DELETE operations)
-        return { success: true };
-    } catch (err) {
-        const error = new Error(err.message || 'An error occurred');
-        error.status = err.response?.status;
-        throw error;
-    }
-};
-
-/**
- * Hook for API operations (GET, POST, PUT, DELETE)
- * @param {string} endpoint - API endpoint (e.g., 'users')
- * @param {Object} options - Additional options
- * @returns {Object} API operations and state
- */
 export function useApi(endpoint, options = {}) {
     const [data, setData] = useState(null);
     const [error, setError] = useState(null);
-    const [isLoading, setIsLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(!options.skipInitialFetch);
 
-    // GET all
     const fetch = async (params = {}) => {
         try {
             setIsLoading(true);
             setError(null);
-            const response = await handleRequest(api.get(endpoint, { searchParams: params }));
+            const response = await apiClient.get(endpoint, params);
             setData(response);
             return response;
         } catch (err) {
@@ -64,7 +23,7 @@ export function useApi(endpoint, options = {}) {
 
     // POST new item
     const create = async (data) => {
-        return handleRequest(api.post(endpoint, { json: data }));
+        return apiClient.post(endpoint, data);
     };
 
     // PUT update item
@@ -79,17 +38,7 @@ export function useApi(endpoint, options = {}) {
             delete cleanData.createdAt;
             delete cleanData.updatedAt;
 
-            const response = await handleRequest(api.put(`${endpoint}/${id}`, {
-                json: cleanData,
-                hooks: {
-                    beforeRequest: [
-                        request => {
-                            console.log('Request headers:', Object.fromEntries(request.headers));
-                            console.log('Clean request body:', cleanData);
-                        }
-                    ]
-                }
-            }));
+            const response = await apiClient.put(endpoint, id, cleanData);
             console.log('Update response:', response);
             await fetch();
             return response;
@@ -108,7 +57,7 @@ export function useApi(endpoint, options = {}) {
         try {
             console.log('Deleting item:', id);
             console.log('Delete URL:', `${endpoint}/${id}`);
-            const response = await handleRequest(api.delete(`${endpoint}/${id}`));
+            const response = await apiClient.delete(endpoint, id);
             await fetch(); // Refresh the data after successful deletion
             return response;
         } catch (err) {
@@ -121,10 +70,21 @@ export function useApi(endpoint, options = {}) {
         }
     };
 
-    // Fetch data on mount and when endpoint changes
+    // Only fetch on mount if skipInitialFetch is not true
     useEffect(() => {
-        fetch();
+        if (!options.skipInitialFetch) {
+            fetch();
+        }
     }, [endpoint]);
+
+    const refetch = useCallback(async () => {
+        try {
+            const response = await apiClient.get(endpoint)
+            setData(response.data || response)
+        } catch (error) {
+            setError(error)
+        }
+    }, [endpoint])
 
     return {
         data,
@@ -133,6 +93,7 @@ export function useApi(endpoint, options = {}) {
         fetch,
         create,
         update,
-        remove
+        remove,
+        refetch
     };
 } 

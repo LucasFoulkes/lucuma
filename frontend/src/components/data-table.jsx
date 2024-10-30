@@ -1,226 +1,161 @@
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
 import { useApi } from '@/hooks/use-api'
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import {
-    Sheet,
-    SheetClose,
-    SheetContent,
-    SheetDescription,
-    SheetFooter,
-    SheetHeader,
-    SheetTitle,
-    SheetTrigger,
-} from "@/components/ui/sheet"
-import { Label } from "@/components/ui/label"
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { useState, useEffect } from 'react'
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select"
-import ky from 'ky'
+import { useState } from 'react'
+import { Button } from '@/components/ui/button';
+import { Search, Plus, Edit, Trash2 } from 'lucide-react';
+import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet"
+import { DynamicForm } from '@/components/dynamic-form';
+import { Table, TableHeader, TableBody, TableRow, TableCell, TableHead } from '@/components/ui/table';
 
-export function DataTable({ title, endpoint }) {
-    const [isOpen, setIsOpen] = useState(false)
-    const [selectedItem, setSelectedItem] = useState(null)
-    const [isUpdateMode, setIsUpdateMode] = useState(false)
-    const [referencedData, setReferencedData] = useState({})
+export function DataTable({ endpoint }) {
+    const { data: schemaData, isLoading: isSchemaLoading } = useApi(`${endpoint}/schema`)
+    const { data, isLoading, error, create, update, remove, refetch } = useApi(endpoint)
+    const [isSheetOpen, setIsSheetOpen] = useState(false)
+    const [searchTerm, setSearchTerm] = useState('')
+    const [editingItem, setEditingItem] = useState(null)
 
-    // Get schema and data
-    const { data: schemaData } = useApi(`${endpoint}/schema`)
-    const { data, create, update, remove, fetch } = useApi(endpoint)
-
-    // Fetch referenced data
-    useEffect(() => {
-        const fetchReferencedData = async () => {
-            if (!schemaData?.schema) return;
-
-            const refs = Object.entries(schemaData.schema)
-                .filter(([_, value]) => value.ref)
-                .map(([field, value]) => ({
-                    field,
-                    endpoint: value.ref.toLowerCase()
-                }));
-
-            const newRefData = {};
-            for (const ref of refs) {
-                try {
-                    const response = await ky.get(`https://cananvalley.systems/api/${ref.endpoint}`, {
-                        headers: {
-                            'Authorization': `Bearer ${localStorage.getItem('token')}`
-                        }
-                    }).json();
-                    newRefData[ref.field] = response;
-                    console.log(`Fetched ${ref.field} data:`, response);
-                } catch (error) {
-                    console.error(`Error fetching ${ref.endpoint} data:`, error);
-                    newRefData[ref.field] = [];
-                }
-            }
-            setReferencedData(newRefData);
-        };
-
-        fetchReferencedData();
-    }, [schemaData]);
-
-    const handleSubmit = async (e) => {
-        e.preventDefault()
-        const formData = new FormData(e.target)
-        const data = Object.fromEntries(formData)
-
-        try {
-            if (isUpdateMode && selectedItem) {
-                await update(selectedItem._id, data)
-            } else {
-                await create(data)
-            }
-            await fetch()
-            setIsOpen(false)
-            setSelectedItem(null)
-            setIsUpdateMode(false)
-        } catch (error) {
-            console.error('Operation error:', error)
-        }
+    if (isLoading || isSchemaLoading) {
+        return <div className="flex items-center justify-center h-full">Loading...</div>
     }
 
-    const handleDelete = async (item) => {
-        try {
-            await remove(item._id)
-            await fetch()
-        } catch (error) {
-            console.error('Delete error:', error)
-        }
+    if (error) {
+        return <div className="text-red-500">Error: {error.message}</div>
     }
 
-    const renderField = (field, schema) => {
-        // Skip system fields
-        if (['_id', '__v', 'createdAt', 'updatedAt'].includes(field)) return null
-
-        // Skip password on update
-        if (field === 'password' && isUpdateMode) return null
-
-        // Reference field
-        if (schema.ref) {
-            const options = referencedData[field] || []
-            console.log(`Rendering ${field} with options:`, options);
-            return (
-                <div key={field} className="space-y-2">
-                    <Label htmlFor={field}>{field}</Label>
-                    <Select
-                        name={field}
-                        defaultValue={selectedItem?.[field]?._id || selectedItem?.[field]}
-                    >
-                        <SelectTrigger>
-                            <SelectValue placeholder={`Select ${field}`} />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {options.map(option => (
-                                <SelectItem
-                                    key={option._id}
-                                    value={option._id}
-                                >
-                                    {option.name || option.username || option._id}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
-            )
-        }
-
-        // Regular field
-        return (
-            <div key={field} className="space-y-2">
-                <Label htmlFor={field}>{field}</Label>
-                <Input
-                    id={field}
-                    name={field}
-                    type={field === 'password' ? 'password' : 'text'}
-                    defaultValue={selectedItem?.[field] || ''}
-                />
-            </div>
+    const filteredData = data?.filter(item =>
+        Object.values(item).some(value =>
+            String(value).toLowerCase().includes(searchTerm.toLowerCase())
         )
+    )
+
+    const handleEdit = (item) => {
+        setEditingItem(item)
+        setIsSheetOpen(true)
     }
 
-    if (!schemaData || !data) return <div>Loading...</div>
+    const handleDelete = async (id) => {
+        if (window.confirm('Are you sure you want to delete this item?')) {
+            await remove(id)
+        }
+    }
+
+    const formatCellValue = (value) => {
+        if (value === null || value === undefined) {
+            return '';
+        }
+
+        // Handle arrays
+        if (Array.isArray(value)) {
+            return value.join(', ');
+        }
+
+        // Handle objects (including GeoJSON)
+        if (typeof value === 'object') {
+            // If it's a reference object with a name property, show the name
+            if (value.name) {
+                return value.name;
+            }
+            // For other objects, show a simplified representation
+            return JSON.stringify(value);
+        }
+
+        // Return primitive values as strings
+        return String(value);
+    }
 
     return (
         <div className="h-full w-full overflow-hidden p-4 gap-3 flex flex-col">
-            <div className="flex justify-between items-center">
-                <Input placeholder="Search" className="w-96" />
-                <Sheet
-                    open={isOpen}
-                    onOpenChange={(open) => {
-                        setIsOpen(open)
-                        if (!open) {
-                            setSelectedItem(null)
-                            setIsUpdateMode(false)
-                        }
-                    }}
-                >
+            <div className="flex items-center justify-between space-x-4">
+                <div className="relative w-96">
+                    <Input
+                        type="text"
+                        placeholder="Search"
+                        className="pl-8"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                    <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+                </div>
+                <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
                     <SheetTrigger asChild>
-                        <Button size="sm">Add {title}</Button>
+                        <Button size="sm" className="flex items-center space-x-2">
+                            <Plus />
+                            <span>Add</span>
+                        </Button>
                     </SheetTrigger>
                     <SheetContent>
                         <SheetHeader>
                             <SheetTitle>
-                                {isUpdateMode ? `Update ${title}` : `Add ${title}`}
+                                {editingItem ? `Edit ${schemaData?.modelName}` : `Add New ${schemaData?.modelName}`}
                             </SheetTitle>
+                            <SheetDescription>
+                                {editingItem
+                                    ? `Edit this ${endpoint} entry.`
+                                    : `Add a new entry to your ${endpoint} collection.`}
+                            </SheetDescription>
                         </SheetHeader>
-                        <form onSubmit={handleSubmit} className="space-y-4 py-4">
-                            {Object.entries(schemaData.schema).map(([field, schema]) =>
-                                renderField(field, schema)
-                            )}
-                            <SheetFooter>
-                                <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>
-                                    Cancel
-                                </Button>
-                                <Button type="submit">
-                                    {isUpdateMode ? 'Update' : 'Save'}
-                                </Button>
-                            </SheetFooter>
-                        </form>
+                        {schemaData && (
+                            <DynamicForm
+                                schema={schemaData}
+                                initialData={editingItem}
+                                onSubmit={async (formData) => {
+                                    if (editingItem) {
+                                        await update(editingItem._id, formData)
+                                    } else {
+                                        await create(formData)
+                                    }
+                                    setEditingItem(null)
+                                    setIsSheetOpen(false)
+                                    await refetch()
+                                }}
+                            />
+                        )}
                     </SheetContent>
                 </Sheet>
             </div>
-            <Card className="flex-1 overflow-auto">
+            <Card className="flex-1 overflow-auto scrollbar-hide">
                 <CardHeader>
-                    <CardTitle>{title}</CardTitle>
+                    <CardTitle>{endpoint}</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                    {data.map((item) => (
-                        <Card key={item._id} className="cursor-pointer hover:bg-gray-50">
-                            <DropdownMenu>
-                                <DropdownMenuTrigger className="w-full text-left p-4">
-                                    <pre>{JSON.stringify(item, null, 2)}</pre>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent>
-                                    <DropdownMenuItem onClick={() => {
-                                        setSelectedItem(item)
-                                        setIsUpdateMode(true)
-                                        setIsOpen(true)
-                                    }}>
-                                        Update
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem
-                                        className="text-red-600"
-                                        onClick={() => handleDelete(item)}
-                                    >
-                                        Delete
-                                    </DropdownMenuItem>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
-                        </Card>
-                    ))}
+                <CardContent>
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                {Object.keys(schemaData?.schema).map((key) => (
+                                    <TableHead key={key}>{key}</TableHead>
+                                ))}
+                                <TableHead>Actions</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {filteredData?.map((item) => (
+                                <TableRow key={item._id}>
+                                    {Object.keys(schemaData?.schema).map((key) => (
+                                        <TableCell key={key}>
+                                            {formatCellValue(item[key])}
+                                        </TableCell>
+                                    ))}
+                                    <TableCell className="space-x-2">
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => handleEdit(item)}
+                                        >
+                                            <Edit className="h-4 w-4" />
+                                        </Button>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => handleDelete(item._id)}
+                                        >
+                                            <Trash2 className="h-4 w-4 text-red-500" />
+                                        </Button>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
                 </CardContent>
             </Card>
         </div>

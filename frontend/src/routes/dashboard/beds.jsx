@@ -7,9 +7,6 @@ export const Route = createFileRoute('/dashboard/beds')({
 
 function Beds() {
   return (
-    <DataTable
-      title="Beds"
-      endpoint="bed"
-    />
+    <DataTable endpoint="bed" />
   )
 }
