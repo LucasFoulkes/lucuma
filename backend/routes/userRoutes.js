@@ -2,17 +2,15 @@ const express = require('express');
 const router = express.Router();
 const restify = require('express-restify-mongoose');
 const User = require('../models/User');
+const Organization = require('../models/Organization');
+const Contact = require('../models/Contact');
 const { authenticate } = require('../middleware/auth');
+const { handleSchemaRequest } = require('../controllers/schemaController');
 
-router.get('/user/schema', authenticate, (req, res) => {
-    const schemaDefinition = User.schema.obj;
-    res.json({
-        schema: schemaDefinition,
-        modelName: User.modelName
-    });
-});
-
-
+router.get('/user/schema', authenticate, handleSchemaRequest(User, {
+    organization: { model: Organization },
+    contact: { model: Contact }
+}));
 
 restify.serve(router, User, {
     prefix: '',
@@ -22,8 +20,7 @@ restify.serve(router, User, {
     findOneAndUpdate: false,
     findOneAndRemove: false,
     preMiddleware: authenticate,
-    select: '-password -__v',
-    modelDescriptions: true,
+    select: '-__v -password',
     populate: [
         {
             path: 'organization',
@@ -33,7 +30,7 @@ restify.serve(router, User, {
             path: 'contact',
             select: '-__v'
         }
-    ],
+    ]
 });
 
 module.exports = router;

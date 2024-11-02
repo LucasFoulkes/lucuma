@@ -1,15 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { DataTable } from '@/components/data-table'
+import { CollectionManager } from '@/components/CollectionManager'
 
 export const Route = createFileRoute('/dashboard/phytopathogens')({
   component: Phytopathogens
 })
 
 function Phytopathogens() {
-  return (
-    <DataTable
-      title="Phytopathogens"
-      endpoint="phytopathogen"
-    />
-  )
+  return <CollectionManager endpoint="phytopathogen" />;
 }

@@ -2,20 +2,13 @@ const express = require('express');
 const router = express.Router();
 const restify = require('express-restify-mongoose');
 const Contact = require('../models/Contact');
+const Organization = require('../models/Organization');
 const { authenticate } = require('../middleware/auth');
+const { handleSchemaRequest } = require('../controllers/schemaController');
 
-
-
-// Add route to get schema
-router.get('/contact/schema', authenticate, (req, res) => {
-    const schemaDefinition = Contact.schema.obj;
-    res.json({
-        schema: schemaDefinition,
-        modelName: Contact.modelName
-    });
-});
-
-
+router.get('/contact/schema', authenticate, handleSchemaRequest(Contact, {
+    organization: { model: Organization }
+}));
 
 restify.serve(router, Contact, {
     prefix: '',
@@ -26,6 +19,12 @@ restify.serve(router, Contact, {
     findOneAndRemove: false,
     preMiddleware: authenticate,
     select: '-__v',
+    populate: [
+        {
+            path: 'organization',
+            select: '-__v'
+        }
+    ],
     onError: (err, req, res, next) => {
         console.error('Contact route error:', err);
         res.status(400).json({

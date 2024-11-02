@@ -4,13 +4,9 @@ const bcrypt = require('bcryptjs');
 const UserSchema = new mongoose.Schema({
     organization: { type: mongoose.Schema.Types.ObjectId, ref: 'Organization' },
     contact: { type: mongoose.Schema.Types.ObjectId, ref: 'Contact' },
-    username: { type: String, required: true, unique: true },
+    username: { type: String, required: true },
+    password: { type: String, required: true },
     role: { type: String },
-    password: {
-        type: String,
-        required: true,
-        select: false // Don't include password by default in queries
-    }
 }, {
     timestamps: true
 });

@@ -3,16 +3,7 @@ const LocationSchema = require('./LocationSchema');
 
 const MeasurementSchema = new mongoose.Schema({
     user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-    targetId: {
-        type: mongoose.Schema.Types.ObjectId,
-        required: true,
-        refPath: 'targetType'
-    },
-    targetType: {
-        type: String,
-        required: true,
-        enum: ['Farm', 'Greenhouse', 'Bed']
-    },
+    bed: { type: mongoose.Schema.Types.ObjectId, ref: 'Bed', required: true },
     pathogen: { type: mongoose.Schema.Types.ObjectId, ref: 'Phytopathogen', required: true },
     parte_afectada: {
         type: String,
@@ -36,7 +27,7 @@ const MeasurementSchema = new mongoose.Schema({
     timestamps: true,
 });
 
-MeasurementSchema.index({ targetType: 1, targetId: 1, date: -1 });
+MeasurementSchema.index({ bed: 1, date: -1 });
 MeasurementSchema.index({ pathogen: 1, date: -1 });
 MeasurementSchema.index({ location: '2dsphere' });
 MeasurementSchema.index({ user: 1, date: -1 });

@@ -1,15 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { DataTable } from '@/components/data-table'
+import { CollectionManager } from '@/components/CollectionManager'
 
 export const Route = createFileRoute('/dashboard/greenhouses')({
   component: Greenhouses
 })
 
 function Greenhouses() {
-  return (
-    <DataTable
-      title="Greenhouses"
-      endpoint="greenhouse"
-    />
-  )
+  return <CollectionManager endpoint="greenhouse" />;
 }

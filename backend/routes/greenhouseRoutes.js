@@ -2,17 +2,13 @@ const express = require('express');
 const router = express.Router();
 const restify = require('express-restify-mongoose');
 const Greenhouse = require('../models/Greenhouse');
+const Farm = require('../models/Farm');
 const { authenticate } = require('../middleware/auth');
+const { handleSchemaRequest } = require('../controllers/schemaController');
 
-// Add route to get schema
-router.get('/greenhouse/schema', authenticate, (req, res) => {
-    const schemaDefinition = Greenhouse.schema.obj;
-    res.json({
-        schema: schemaDefinition,
-        modelName: Greenhouse.modelName
-    });
-});
-
+router.get('/greenhouse/schema', authenticate, handleSchemaRequest(Greenhouse, {
+    farm: { model: Farm }
+}));
 
 restify.serve(router, Greenhouse, {
     prefix: '',

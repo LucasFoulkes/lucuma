@@ -1,6 +1,5 @@
 import ky from 'ky';
 
-// Create API client with auth handling
 const api = ky.create({
     prefixUrl: 'https://cananvalley.systems/api',
     hooks: {
@@ -13,33 +12,66 @@ const api = ky.create({
             }
         ]
     },
-    timeout: 30000
+    timeout: 30000,
+    retry: {
+        limit: 2,
+        methods: ['get', 'put', 'post', 'delete'],
+        statusCodes: [408, 413, 429, 500, 502, 503, 504]
+    }
 });
 
-// API client methods
 export const apiClient = {
-    async get(endpoint, params = {}) {
-        const response = await api.get(endpoint, { searchParams: params });
-        return response.json();
+    async get(url, params) {
+        try {
+            const response = await api.get(url, {
+                searchParams: params
+            }).json();
+            return response;
+        } catch (error) {
+            console.error(`API Error (GET ${url}):`, error);
+            throw error;
+        }
     },
 
-    async post(endpoint, data) {
-        const response = await api.post(endpoint, { json: data });
-        return response.json();
+    async post(url, data) {
+        try {
+            if (process.env.NODE_ENV === 'development') {
+                console.log(`POST ${url} request data:`, data);
+            }
+
+            const response = await api.post(url, {
+                json: data
+            }).json();
+            return response;
+        } catch (error) {
+            console.error(`API Error (POST ${url}):`, error);
+            if (error.response) {
+                const errorData = await error.response.json().catch(() => ({}));
+                console.error('Error details:', errorData);
+            }
+            throw error;
+        }
     },
 
-    async put(endpoint, id, data) {
-        // Clean MongoDB fields
-        const cleanData = { ...data };
-        delete cleanData.__v;
-        delete cleanData.createdAt;
-        delete cleanData.updatedAt;
-
-        const response = await api.put(`${endpoint}/${id}`, { json: cleanData });
-        return response.json();
+    async put(url, data) {
+        try {
+            const response = await api.put(url, {
+                json: data
+            }).json();
+            return response;
+        } catch (error) {
+            console.error(`API Error (PUT ${url}):`, error);
+            throw error;
+        }
     },
 
-    async delete(endpoint, id) {
-        return api.delete(`${endpoint}/${id}`);
+    async delete(url) {
+        try {
+            const response = await api.delete(url).json();
+            return response;
+        } catch (error) {
+            console.error(`API Error (DELETE ${url}):`, error);
+            throw error;
+        }
     }
 }; 

@@ -1,99 +1,40 @@
-import { useState, useEffect, useCallback } from 'react';
+import useSWR from 'swr';
 import { apiClient } from '@/lib/api-client';
 
-export function useApi(endpoint, options = {}) {
-    const [data, setData] = useState(null);
-    const [error, setError] = useState(null);
-    const [isLoading, setIsLoading] = useState(!options.skipInitialFetch);
+export function useApi(endpoint) {
+    const {
+        data,
+        error,
+        isLoading,
+        mutate: swrMutate
+    } = useSWR(endpoint, () => apiClient.get(endpoint), {
+        // Add SWR configuration to reduce unnecessary revalidation
+        revalidateOnFocus: false,
+        revalidateOnReconnect: false,
+        shouldRetryOnError: false,
+        dedupingInterval: 2000 // Dedupe requests within 2 seconds
+    });
 
-    const fetch = async (params = {}) => {
+    const mutate = async (optimisticData) => {
         try {
-            setIsLoading(true);
-            setError(null);
-            const response = await apiClient.get(endpoint, params);
-            setData(response);
-            return response;
-        } catch (err) {
-            setError(err);
-            throw err;
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    // POST new item
-    const create = async (data) => {
-        return apiClient.post(endpoint, data);
-    };
-
-    // PUT update item
-    const update = async (id, data) => {
-        try {
-            console.log('Updating item:', id, data);
-            console.log('Update URL:', `${endpoint}/${id}`);
-
-            // Remove MongoDB system fields from the update data
-            const cleanData = { ...data };
-            delete cleanData.__v;
-            delete cleanData.createdAt;
-            delete cleanData.updatedAt;
-
-            const response = await apiClient.put(endpoint, id, cleanData);
-            console.log('Update response:', response);
-            await fetch();
-            return response;
-        } catch (err) {
-            console.error('Update error details:', {
-                message: err.message,
-                status: err.status,
-                response: err.response
-            });
-            throw err;
-        }
-    };
-
-    // DELETE item
-    const remove = async (id) => {
-        try {
-            console.log('Deleting item:', id);
-            console.log('Delete URL:', `${endpoint}/${id}`);
-            const response = await apiClient.delete(endpoint, id);
-            await fetch(); // Refresh the data after successful deletion
-            return response;
-        } catch (err) {
-            console.error('Delete error details:', {
-                message: err.message,
-                status: err.status,
-                response: err.response
-            });
-            throw err;
-        }
-    };
-
-    // Only fetch on mount if skipInitialFetch is not true
-    useEffect(() => {
-        if (!options.skipInitialFetch) {
-            fetch();
-        }
-    }, [endpoint]);
-
-    const refetch = useCallback(async () => {
-        try {
-            const response = await apiClient.get(endpoint)
-            setData(response.data || response)
+            if (optimisticData) {
+                // Update the cache with optimistic data
+                await swrMutate(optimisticData, { revalidate: false });
+            }
+            // Revalidate the data
+            return await swrMutate(undefined, { revalidate: true });
         } catch (error) {
-            setError(error)
+            console.error('Mutation error:', error);
+            // Revalidate on error to ensure correct state
+            await swrMutate(undefined, { revalidate: true });
+            throw error;
         }
-    }, [endpoint])
+    };
 
     return {
         data,
         error,
         isLoading,
-        fetch,
-        create,
-        update,
-        remove,
-        refetch
+        mutate
     };
 } 

@@ -16,8 +16,8 @@ import {
 const navigationItems = [
   { to: '/dashboard', icon: Home, label: null }, // null label will use username
   { to: '/dashboard/organizations', icon: Building2, label: 'Organizations' },
-  { to: '/dashboard/users', icon: Users, label: 'Users' },
   { to: '/dashboard/contacts', icon: Phone, label: 'Contacts' },
+  { to: '/dashboard/users', icon: Users, label: 'Users' },
   { to: '/dashboard/farms', icon: Leaf, label: 'Farms' },
   { to: '/dashboard/greenhouses', icon: Warehouse, label: 'Greenhouses' },
   { to: '/dashboard/beds', icon: Sprout, label: 'Beds' },

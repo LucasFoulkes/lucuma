@@ -1,23 +1,19 @@
 const mongoose = require('mongoose');
 
-const ContactSchema = new mongoose.Schema({
+const contactSchema = new mongoose.Schema({
+    organization: { type: mongoose.Schema.Types.ObjectId, ref: 'Organization', required: true },
     name: { type: String, required: true },
     lastName: { type: String, required: true },
-    email: { type: String, required: false, unique: true },
-    phone: { type: String, required: false },
-    address: { type: String, required: false },
-    city: { type: String, required: false },
-    country: { type: String, required: false },
-    idNumber: { type: String, required: false },
-    notes: { type: String, required: false }
-}, {
-    timestamps: true
-});
+    email: { type: String },
+    phone: { type: String },
+    address: { type: String },
+    city: { type: String },
+    state: { type: String },
+    zip: { type: String },
+    country: { type: String },
+    title: { type: String },
+    notes: { type: String },
+    tags: { type: [String] },
+}, { timestamps: true });
 
-ContactSchema.virtual('user', {
-    ref: 'User',
-    localField: '_id',
-    foreignField: 'contact',
-});
-
-module.exports = mongoose.model('Contact', ContactSchema);
+module.exports = mongoose.model('Contact', contactSchema);
