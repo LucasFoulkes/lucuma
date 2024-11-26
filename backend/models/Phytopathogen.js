@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const PhytopathogenSchema = new mongoose.Schema({
-    name: { type: String },
+    name: { type: String, required: true },
     scientificName: { type: String },
     description: String,
     attributes: [{

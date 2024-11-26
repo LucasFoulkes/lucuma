@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
+
 const UserSchema = new mongoose.Schema({
     organization: { type: mongoose.Schema.Types.ObjectId, ref: 'Organization' },
     contact: { type: mongoose.Schema.Types.ObjectId, ref: 'Contact' },
@@ -11,7 +12,6 @@ const UserSchema = new mongoose.Schema({
     timestamps: true
 });
 
-// Hash password before saving
 UserSchema.pre('save', async function (next) {
     if (!this.isModified('password')) return next();
 
@@ -23,5 +23,6 @@ UserSchema.pre('save', async function (next) {
         next(error);
     }
 });
+
 
 module.exports = mongoose.model('User', UserSchema);

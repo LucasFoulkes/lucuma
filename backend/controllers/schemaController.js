@@ -1,12 +1,18 @@
 const getEnhancedSchema = async (Model, referenceMap = {}) => {
     try {
         const schemaDefinition = Model.schema.obj;
-        const enhancedSchema = {
-            _id: { type: 'ObjectId', auto: true },
-            ...schemaDefinition
-        };
 
-        // Only fetch references if they exist
+        const enhancedSchema = {};
+
+        for (const [field, config] of Object.entries(schemaDefinition)) {
+            if (config.obj) {
+                enhancedSchema[field] = simplifyNestedSchema(config.obj);
+                continue;
+            }
+
+            enhancedSchema[field] = simplifyFieldConfig(config);
+        }
+
         for (const [field, config] of Object.entries(referenceMap)) {
             if (schemaDefinition[field]) {
                 const refData = await config.model.find()
@@ -14,20 +20,62 @@ const getEnhancedSchema = async (Model, referenceMap = {}) => {
                     .lean();
 
                 enhancedSchema[field] = {
-                    ...schemaDefinition[field],
+                    ...enhancedSchema[field],
                     data: refData
                 };
             }
         }
 
-        return {
-            schema: enhancedSchema,
-            modelName: Model.modelName
-        };
+        return enhancedSchema;
     } catch (error) {
         console.error('Error enhancing schema:', error);
         throw error;
     }
+};
+
+const simplifyFieldConfig = (config) => {
+    const simplified = {};
+
+    if (config.type) {
+        simplified.type = getFieldType(config.type);
+    }
+    if (config.required) {
+        simplified.required = true;
+    }
+    if (config.enum) {
+        simplified.enum = config.enum;
+    }
+    if (config.ref) {
+        simplified.ref = config.ref;
+    }
+
+    return simplified;
+};
+
+const simplifyNestedSchema = (schema) => {
+    const simplified = {};
+
+    for (const [field, config] of Object.entries(schema)) {
+        simplified[field] = simplifyFieldConfig(config);
+    }
+
+    return {
+        type: 'Object',
+        required: false,
+        fields: simplified
+    };
+};
+
+const getFieldType = (type) => {
+    if (type.name) {
+        return type.name;
+    }
+    if (type === String) return 'String';
+    if (type === Number) return 'Number';
+    if (type === Boolean) return 'Boolean';
+    if (type === Date) return 'Date';
+    if (type === Array) return 'Array';
+    return 'Mixed';
 };
 
 const handleSchemaRequest = (Model, referenceMap = {}) => {

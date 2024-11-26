@@ -1,7 +1,8 @@
 import ky from 'ky';
 
 const api = ky.create({
-    prefixUrl: 'https://cananvalley.systems/api',
+    // prefixUrl: 'https://cananvalley.systems/api',
+    prefixUrl: 'http://localhost:4000/api',
     hooks: {
         beforeRequest: [
             request => {
@@ -74,4 +75,5 @@ export const apiClient = {
             throw error;
         }
     }
+}; 
 }; 

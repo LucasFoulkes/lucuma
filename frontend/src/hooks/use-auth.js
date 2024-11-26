@@ -3,7 +3,8 @@ import ky from 'ky';
 
 // Update the api creation to include Authorization header when token exists
 const api = ky.create({
-    prefixUrl: 'https://cananvalley.systems/api/auth',
+    // prefixUrl: 'https://cananvalley.systems/api/auth',
+    prefixUrl: 'http://localhost:4000/api/auth',
     hooks: {
         beforeRequest: [
             request => {
